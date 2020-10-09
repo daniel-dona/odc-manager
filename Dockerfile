@@ -1,11 +1,14 @@
-FROM openjdk:12-alpine
+FROM maven:3-openjdk-11 AS base
 
-RUN addgroup -S ids && adduser -S -g ids ids
-WORKDIR /home/app/
-RUN chown -R ids: ./ && chmod -R u+w ./
-RUN mkdir -p /ids/repo/ && chown -R ids: /ids/repo/ && chmod -R u+w /ids/repo/
-RUN mkdir -p /ids/certs/ && chown -R ids: /ids/certs/ && chmod -R u+w /ids/certs/
-COPY /target/odc-manager-1.1.0-fat.jar .
-EXPOSE 8080
-USER ids
-ENTRYPOINT ["java", "-jar", "./odc-manager-1.1.0-fat.jar"]
+FROM base AS build
+
+COPY src /build/src
+COPY pom.xml /build/pom.xml
+WORKDIR /build
+RUN mvn package
+
+FROM base AS deploy
+COPY --from=build /build/target/odc-manager-*-fat.jar /home/app/odc-manager.jar
+WORKDIR /home/app
+
+ENTRYPOINT ["java", "-jar", "odc-manager.jar"]
