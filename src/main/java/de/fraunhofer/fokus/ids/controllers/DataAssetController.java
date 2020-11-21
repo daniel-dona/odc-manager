@@ -125,6 +125,7 @@ public class DataAssetController {
                             dataAsset.setSourceID(dataSource.getId());
                             dataAsset.setDatasetNotes((String)dataAssetDescription.getData().get("datasetnotes"));
                             dataAsset.setDatasetTitle((String)dataAssetDescription.getData().get("datasettitle"));
+                            dataAsset.setFilename((String)dataAssetDescription.getData().get("file"));
                             dataAsset.setStatus(DataAssetStatus.APPROVED);
                             next.handle(Future.succeededFuture(dataAsset));
                         }
@@ -177,8 +178,10 @@ public class DataAssetController {
     public void getFileName(Long id, Handler<AsyncResult<String>> result){
         dataAssetManager.findById(id,jsonObjectAsyncResult -> {
             if (jsonObjectAsyncResult.succeeded()){
+				LOGGER.info(jsonObjectAsyncResult.result().toString());
                 DataAsset dataAsset = Json.decodeValue(jsonObjectAsyncResult.result().toString(), DataAsset.class);
-                result.handle(Future.succeededFuture(dataAsset.getFilename()));
+                LOGGER.info(dataAsset.getFilename());
+                result.handle(Future.succeededFuture("/file-uploads/"+dataAsset.getFilename()));
             }
             else {
                 LOGGER.error(jsonObjectAsyncResult.cause());

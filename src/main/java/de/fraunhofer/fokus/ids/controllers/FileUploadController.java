@@ -69,8 +69,9 @@ public class FileUploadController {
         List<String> list= new ArrayList<>();
         for (FileUpload fileUpload : routingContext.fileUploads()){
             File fileSource = new File(fileUpload.uploadedFileName());
-            File fileDes = new File(fileUpload.fileName());
+            File fileDes = new File("/file-uploads/"+fileUpload.fileName());
             try {
+				LOGGER.info("Moving file to "+fileDes.getAbsolutePath());
                 FileUtils.moveFile(fileSource,fileDes);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -78,12 +79,13 @@ public class FileUploadController {
             list.add(fileUpload.fileName().trim());
         }
         JsonObject data = new JsonObject(routingContext.request().getFormAttribute("data"));
+        LOGGER.info(data);
         Map<String, String> map = new HashMap<String , String>()
         {
             {
                 put("datasettitle", data.getString("datasettitle"));
                 put("datasetnotes", data.getString("datasetnotes"));
-                put("file", list.toString());
+                put("file", list.get(0).toString());
             }
         };
         dataAssetDescription.setData(map);

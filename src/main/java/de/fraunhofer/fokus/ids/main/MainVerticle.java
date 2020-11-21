@@ -345,13 +345,16 @@ public class MainVerticle extends AbstractVerticle{
 	}
 
 	private void replyFile(AsyncResult<File> result,Long id, HttpServerResponse response){
+		LOGGER.info("Sending file "+id.toString());
 		dataAssetController.getFileName(id,stringAsyncResult->{
 		    if (stringAsyncResult.succeeded()){
+				LOGGER.info(stringAsyncResult.result().toString());
                 if(result.succeeded()){
                     if(result.result() != null) {
+						LOGGER.info("Sending file from "+stringAsyncResult.result().toString());
                         response.putHeader(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename="+stringAsyncResult.result());
-                        response.sendFile(result.result().toString());
-                        new File(result.result().toString()).delete();
+                        response.sendFile(stringAsyncResult.result().toString());
+                        new File(stringAsyncResult.result().toString()).delete();
                     } else {
 						LOGGER.error("Dataset not found! ",stringAsyncResult.cause());
 						response.setStatusCode(404).end();
